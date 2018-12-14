@@ -1,0 +1,198 @@
+# simple_cms.txt
+
+Understanding
+  - Getting Started
+    + Route for '/'
+      > Need an application file in the main directory of the
+        application
+      > This should be a GET method
+    + Displays 'Getting started.' to the user
+      > This appears not to have any particular formatting so
+        could be sent back to the browser as a simple string.
+      > Still better to render it in a view template with
+        simple HTML
+    + What other files do I need?
+      > Gemfile, will certainly need other dependencies
+      > CSS file, eventually
+      > JavaScript, maybe
+
+Implementaion
+  - Getting Started
+    + Route for '/'
+      > Create file `cms.rb`
+      > Include sinatra, reloader, tilt
+      > Implement a get for '/'
+      > Render a view (home, getting_started ?)
+    + Getting Started
+      > Views folder
+      > Erb file
+      > HTML
+      > simple `<p>` tag to display the phrase
+
+Adding an Index Page
+Understanding
+  - The files are the storage for the cms app
+  - The files should all be stored in one directory outside of
+    the route directory of our project. (subdirectory)
+  - Modify the same route as 'Getting Started.' to display the
+    contents of the 'data' directory
+  - I'm using a view template, so modify that template
+
+Implementation
+  - Create a `data` directory in the route
+  - Create 3 text files in `data`
+  - Store the contents of the `data` directory as a variable
+    (`Dir`)
+    + `Dir#[]` takes a string and returns an array of strings
+    + The strings need to be cleaned up so as to remove the
+      directory extension
+      > Can use `String#gsub`
+      > regex or string argument to replace the 'data/'
+  - Make the instance variable available to the `home.erb` file
+  - Rendering
+    + Iterate the array of files stored as an instance variable
+    + Output them as an unordered list in embedded HTML.
+  - Note* All of this could be done w/o the erb file returning
+    the unordered list as an erb result string.
+
+Viewing Text Files
+  - 1) Index/home page presents a list of links
+
+  - 2) Clicking the link takes the user to the page w/ the
+    content of the file.
+
+  - 3) The actual path name in the browser should take the user
+    to the pertinent page
+
+  - 4) Text file rendered as plaintext
+
+Implementation
+  - 1)
+    + Render each list item w/ an `<a>` tag containing an
+      `href` attribute
+  - 2)
+    + GET for the link
+    + Create a view template in which to render the content, or
+      send back the content as plaintext
+  - 3)
+    + GET for the path
+    + Should be the same as the previous
+    + Unless, the previous ought to have been a POST which I
+      wouldn't see the reason for.
+  - 4)
+    + Put the file content in a nested `<p>` tag that has a
+      parent `<a>` with a type of 'plaintext'?
+      > I may have to use the CSS file to format this.
+
+Adding Tests
+  - 1) Write tests for the routes the application already has
+    + Must have a test file
+      > All proper requirements
+      > The class
+      > The tests
+      > The assertions
+    + File to test is `cms.rb`
+    + Test must be in the `test` subdirectory according to the
+      filepath that was in the example
+Implementation
+  - Make a test directory
+  - Make the test file
+    + Set my environment variable
+    + Require my libraries
+    + Make the expected call to `app`?
+    + Write the test suite
+      > Inherits from `Minitest::Test`
+      > Write my tests
+    + Tests for current routes
+
+Handling Requests for Nonexistent Documents
+  - A non-existent document will prompt a Sinatra not found
+    page
+  - The Not Found is a 3xx status
+    + Does this have to be implemented on each of our routes?
+    + Special route `not_found`
+  - 1) Redirect a user to the index page and show a message
+    `$DOCUMENT does not exist.` when attempting to view a
+    document that does not exist.
+  - 2) Write a test for the assignment
+    + Lesson prompts us to try to describe exactly what the
+      user does in the test.
+    + I find this adds to the obscurity
+
+Implementation
+  - 1)
+    + Enable sessions in the application
+    + Store a message in the session
+      > Document available in the `params` hash
+      > Should be part of a path parameter
+      > Use `File::basename` to get the name of the file.
+      > Alternatively, request info can be accessed with `request#...`
+    + Add a display in the index.erb that deletes and returns
+      the session message
+  - 2) 
+    + I would test for the status
+    + Test the `not_found` to have a 3xx status
+
+Viewing Markdown Files
+  - Markdown, text-to-html markup language
+    + Raw Markdown to HTML libraries
+  - 1) When a user views a document written in Markdown format
+    , the browser should render the rendered HTML version of the document's content.
+    + The document should be in markdown
+    + I need to brush-up on markdown
+
+Implementation
+  - 1)
+    / + Add `redcarpet` to the `Gemfile`
+    /   > Run `bundle install`
+    / + Add `require "redcarpet"` to app
+    / + Figure out what a markdown document looks like
+    /   > Rename about.txt to about.md
+    / + Re-write my about page with the new content in
+        Markdown
+    / + Create a helper method 'render_markdown'
+    + Modify the `/:filename' route to determine if a file is
+      in Markdown.
+      > Once I know it's a file
+        = Need to know what it's extension is
+        = Render a txt file as plaintext
+        = Render an md file as HTML
+        = Different header
+        = Use the helper
+          - This presupposes that I'm using a view template?
+      > User `render_markdown` if so
+
+Editing Document Content
+  - 1) Link "Edit" next to each document on index page
+  - 2) Clicking the Edit Link takes the user to an edit page
+    for the document
+  - 3) Document's content appears in a textarea of the edit
+    page
+  - 4) Editing and clicking "Save Changes" redirects to the
+    index page showing `$FILENAME has been updated`
+
+Implementation
+  - 1)
+    + Update `index.erb` to support a link when iterating
+  - 2)
+    + Create a GET for '/:filename/edit'
+    + Create an `edit_document.erb`
+  - 3)
+    + Put the file content in an HTML element that can be
+      styled as a box
+      > Form, input
+      > Box border, solid black line
+      > Little knotches in the lower right corner
+      > Aligned left
+      > Not much padding
+      > Contents also aligned left
+  - 4) 
+    + Create a POST for the form action in `cms.rb`
+      '/:filename/edit'
+    + Define the action in `edit_document.erb` to POST
+      appropriately
+    + Form name, 'Save Changes'
+    + The name of the document captured from the URL and
+      displayed as a flash message.
+      > Add a message to the session in POST route
+      > Redirect the user to the index page

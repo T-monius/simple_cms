@@ -1,0 +1,12 @@
+<% if session[:message] %>
+  <p><%= session.delete(:message) %></p>
+<% end %>
+
+<ul>
+  <% @cmsfiles.each do |filename| %>
+    <li>
+      <a href="/<%= filename %>"><%= filename %></a>
+      <a href="/<%= filename %>/edit">Edit</a>
+    </li>
+  <% end %>
+</ul>
