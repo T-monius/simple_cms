@@ -3,11 +3,26 @@ require 'sinatra/reloader'
 require 'tilt/erubis'
 require 'redcarpet'
 
-root = File.expand_path("..", __FILE__ )
-
 configure do
   enable :sessions
   set :session_secret, 'random'
+end
+
+def main_env_path
+  File.expand_path("../data", __FILE__)
+end
+
+def content_from_main_system_file(filename)
+  file = File.join(main_env_path, filename)
+  File.read(file)
+end
+
+def data_path
+  if ENV["RACK_ENV"] == "test"
+    File.expand_path("../test/data", __FILE__)
+  else
+    File.expand_path("../data", __FILE__)
+  end
 end
 
 def render_markdown(md_file)
@@ -27,7 +42,8 @@ end
 
 # Go to the main index
 get '/' do
-  @cmsfiles = Dir[root + '/data/*'].map do |path|
+  pattern = File.join(data_path, '*')
+  @cmsfiles = Dir[pattern].map do |path|
     File.basename(path)
   end
 
@@ -36,7 +52,7 @@ end
 
 # View a document's page
 get '/:filename' do
-  file_path = root + "/data/" + params[:filename]
+  file_path = File.join(data_path, params[:filename])
 
   if File.file?(file_path)
     load_file_content(file_path)    
@@ -47,15 +63,18 @@ end
 
 # Go to the page for editing
 get '/:filename/edit' do
+  file_path = File.join(data_path, params[:filename])
+
   @filename = params[:filename]
-  @content = File.read(root + '/data/' + @filename)
+  @content = File.read(file_path)
 
   erb :edit_document
 end
 
 # Update a file
 post '/:filename' do
-  file_path = root + '/data/' + params[:filename]
+  file_path = File.join(data_path, params[:filename])
+
   change = params[:content]
   File.open(file_path, 'w+') { |file| file.write(change) }
 
