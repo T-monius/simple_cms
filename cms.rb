@@ -36,8 +36,14 @@ def load_file_content(file_path)
       headers['Content-Type'] = 'text/plain'
       content
   elsif File.extname(file_path) == '.md'
-    render_markdown(content)
+    erb render_markdown(content)
+  else
+    content
   end
+end
+
+def new_document(name)
+  File.new(File.join(data_path, name), 'w')
 end
 
 # Go to the main index
@@ -47,7 +53,28 @@ get '/' do
     File.basename(path)
   end
 
-  erb :index
+  erb :index, layout: :layout
+end
+
+# Render a form for creating a new document
+get '/new_document' do
+  erb :new, layout: :layout
+end
+
+# Create the new document
+post '/create_document' do
+  new_name = params[:doc_name]
+  if new_name.empty?
+    session[:message] = 'A name is required.'
+    status 422
+    erb :new, layout: :layout
+  else
+    new_document(new_name)
+
+    session[:message] = "#{new_name} was created."
+
+    redirect '/'
+  end
 end
 
 # View a document's page
@@ -68,7 +95,7 @@ get '/:filename/edit' do
   @filename = params[:filename]
   @content = File.read(file_path)
 
-  erb :edit_document
+  erb :edit_document, layout: :layout
 end
 
 # Update a file

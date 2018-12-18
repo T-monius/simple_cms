@@ -1,7 +1,3 @@
-<% if session[:message] %>
-  <p><%= session.delete(:message) %></p>
-<% end %>
-
 <ul>
   <% @cmsfiles.each do |filename| %>
     <li>
@@ -10,3 +6,6 @@
     </li>
   <% end %>
 </ul>
+<p>
+  <a href="/new_document">New Document</a>
+</p>

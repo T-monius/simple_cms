@@ -196,3 +196,66 @@ Implementation
       displayed as a flash message.
       > Add a message to the session in POST route
       > Redirect the user to the index page
+
+Adding Global Style and Behaviour
+  - 1) Message displayed to the user against a yellow
+    background
+    + `background-color`
+  - 2) Messages disappear if the page they appear on is
+    reloaded
+    + This functionality already exists...
+  - 3) Text Files should continue to be displayed by the
+    browser as plain text
+    + Will I need to override a global text selector or simply
+      use a more specific rule?
+  - 4) The entire site (icluding markdown files, but not
+    text files) should be displayed in a sans-serif typeface
+    + Can use a reset with * or create selectors
+  - Understanding
+    + Since we are talking about global styling, we should use
+      a CSS file
+    + Another consideration is whether or not a layout is
+      necessary at this point
+    + Can reset all elements with *
+
+Implementation
+  - 1) 
+    + Create a CSS class selector for messages
+    + Make the flash message of a class
+    + Define the CSS selector with a property of `background-
+      image` and a value of yellow
+  - 2)
+    + Already handled
+  - 3)
+    + These files do seem to be rendering as plaintext as the
+      header type is set
+  - 4)
+    + 
+
+Adding a Document
+  - 1) When a user views the index page, they should see a
+    link that says "New Document".
+  - 2) When a user clicks the "New Document" link, they
+    should be taken to a page with a text input labeled "Add a new document:" and a submit button labeled "Create":
+  - 3) When a user enters a document name and clicks
+    Create", they should be redirected to the index page. The name they entered in the form should now appear in the file list. They should see a message that says "$FILENAME was created.", where $FILENAME is the name of the document just created:
+  - 4) If a user attempts to create a new document without a
+    name, the form should be re-displayed and a message should say "A name is required."
+
+Implementation
+  - 1)
+    + A new link in the `index.erb` page
+    + Link with a new GET route in `cms.rb` to handle it
+  - 2)
+    + Route sends the user to a page that is similar to the
+      edit document route
+    + Form document with a test area
+      > This text area is much smaller than in the other
+      > The input is the name of the document
+  - 3/4)
+    + POST to handle the form submission
+    + Validate the input
+      > If it's valid then create a document by that name
+        and store the name as a message
+      > Else store a message and re-render the new document
+        page.

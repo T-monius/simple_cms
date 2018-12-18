@@ -103,6 +103,33 @@ class SimpleCMSTest < Minitest::Test
     assert_includes last_response.body, "new content"
   end
 
+  def test_new_document_get_route
+    get '/new_document'
+
+    assert_equal 200, last_response.status
+    assert_includes last_response.body, "<input"
+    assert_includes last_response.body, %q(<button type="submit")
+  end
+
+  def test_creating_new_document
+    post '/create_document', doc_name: 'leisure.txt'
+
+    assert_equal 302, last_response.status
+
+    get last_response["location"]
+
+    assert_includes last_response.body, 'leisure.txt was created.'
+    
+    get "/"
+    assert_includes last_response.body, "leisure.txt"
+  end
+
+  def test_create_new_document_without_filename
+    post "/create_document", doc_name: ""
+    assert_equal 422, last_response.status
+    assert_includes last_response.body, "A name is required"
+  end
+
   def test_not_found
     get '/notta_file.txt'
     assert_equal 302, last_response.status
