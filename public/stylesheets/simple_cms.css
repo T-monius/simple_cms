@@ -7,3 +7,20 @@ body {
   padding: 10px;
   background: #FFFF99;
 }
+
+form.inline {
+  display: inline;
+}
+
+div.block {
+  display: block;
+}
+
+#sign_in_button {
+  display: block;
+}
+
+.user-status {
+  font-style: italic;
+  font-size: 0.9em;
+}

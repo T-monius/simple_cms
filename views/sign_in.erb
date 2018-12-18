@@ -1,0 +1,11 @@
+<form class="inline" action="/user/sign_in" method="post">
+  <div>
+    <label for='username'>Username:</label>
+    <input type="text" name="username" value="<%= @username || '' %>" />
+  </div>
+  <div class='block'>
+    <label for='password'>Password:</label>
+    <input type="text" name="password" />
+  </div>
+  <button type="submit" id="sign_in_button">Sign In</button>
+</form>

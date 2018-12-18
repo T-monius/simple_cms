@@ -120,7 +120,7 @@ class SimpleCMSTest < Minitest::Test
 
     assert_includes last_response.body, 'leisure.txt was created.'
     
-    get "/"
+    get '/'
     assert_includes last_response.body, "leisure.txt"
   end
 
@@ -128,6 +128,57 @@ class SimpleCMSTest < Minitest::Test
     post "/create_document", doc_name: ""
     assert_equal 422, last_response.status
     assert_includes last_response.body, "A name is required"
+  end
+
+  def test_deleting_a_document
+    content = content_from_main_system_file('history.txt')
+    create_document 'history.txt', content
+
+    post '/history.txt/delete'
+
+    assert_equal 302, last_response.status
+
+    get last_response["Location"]
+    assert_includes last_response.body, "history.txt was deleted"
+
+    get "/"
+    refute_includes last_response.body, "history.txt"
+  end
+
+  def test_sign_in_page
+    get '/user/sign_in'
+
+    assert_equal 200, last_response.status
+    assert_includes last_response.body, 'Username:'
+    assert_includes last_response.body, %q(<button type="submit")
+  end
+
+  def test_signing_in
+    post '/user/sign_in', username: "admin", password: "secret"
+
+    assert_equal 302, last_response.status
+
+    get last_response["Location"]
+    assert_includes last_response.body, 'Welcome!'
+    assert_includes last_response.body, "Signed in as admin"
+  end
+
+  def test_signin_with_bad_credentials
+    post "/user/sign_in", username: "guest", password: "shhhh"
+    assert_equal 422, last_response.status
+    assert_includes last_response.body, "Invalid Credentials"
+  end
+
+  def test_signout
+    post "/user/sign_in", username: "admin", password: "secret"
+    get last_response["Location"]
+    assert_includes last_response.body, "Welcome"
+
+    post "/user/sign_out"
+    get last_response["Location"]
+
+    assert_includes last_response.body, "You have been signed out."
+    assert_includes last_response.body, "Sign In"
   end
 
   def test_not_found

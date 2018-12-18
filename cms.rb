@@ -77,6 +77,36 @@ post '/create_document' do
   end
 end
 
+# User sign in
+get '/user/sign_in' do
+  erb :sign_in, layout: :layout
+end
+
+# Sign the user in
+post '/user/sign_in' do
+  @username = params[:username]
+  password = params[:password]
+
+  if @username == 'admin' && password == 'secret'
+    session[:signed_in] = true
+    session[:username] = @username
+    session[:message] = 'Welcome!'
+    redirect '/'
+  else
+    session[:message] = 'Invalid Credentials'
+    status 422
+    erb :sign_in, layout: :layout
+  end
+end
+
+# Sign the user out
+post '/user/sign_out' do
+  session[:signed_in] = false
+  session.delete(:username)
+  session[:message] = 'You have been signed out.'
+  redirect '/'
+end
+
 # View a document's page
 get '/:filename' do
   file_path = File.join(data_path, params[:filename])
@@ -107,6 +137,21 @@ post '/:filename' do
 
   session[:message] = "#{params[:filename]} has been updated."
   redirect '/'
+end
+
+# Delete a document
+post '/:filename/delete' do
+  filename = params[:filename]
+  file_path = File.join(data_path, filename)
+
+  if File.file?(file_path)
+    File.delete(file_path)
+    session[:message] = "#{filename} was deleted."
+    redirect '/'
+  else
+    session[:message] = "No file #{filename} to delete."
+    erb :index, layout: :layout
+  end
 end
 
 not_found do

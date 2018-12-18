@@ -259,3 +259,47 @@ Implementation
         and store the name as a message
       > Else store a message and re-render the new document
         page.
+
+Deleting Documents
+  - 1) When a user views the index page, they should see a
+    "delete" button next to each document.
+  - 2) When a user clicks a "delete" button, the application
+    should delete the appropriate document and display a message: "$FILENAME was deleted".
+
+Implementation
+  - 1)
+    + Add a new form to the index page with a submit button
+    + The form is to a POST route
+  - 2)
+    + Use an `IO` or `File` class method to delete the
+      document
+    + Add a message
+    + Re-render the page
+
+Signing In and Out
+  - 1)
+    + Add a link to the page for 'Sign In'
+    + get that redirects to sign in page
+  - 2)
+    + get route for '/user/sign_in' ?
+    + Template for Signing in
+      > Form
+      > post action with given value
+      > Two inputs: username and password
+      > Button: 'Sign In'
+  - 3) 
+    + post route
+      > Verifies the username and password
+      > If they pass, assign a 'signed in' token to true
+        then redirect to the route
+      > 4) Else, re-render the sign in page w/ the username as
+        a value for the first input in the form
+  - 5)
+    + Modify the index page to display the 'signed in message'
+      if the session 'signed in' token is true
+    + Display a link for 'Sign Out' (post)
+  - 6)
+    + Post route for 'Signing Out'
+    + Modify the session 'signed_in' to reflect false
+    + Set a message to the session for 'signing out'
+    + redirect to the index

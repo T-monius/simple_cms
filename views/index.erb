@@ -3,9 +3,22 @@
     <li>
       <a href="/<%= filename %>"><%= filename %></a>
       <a href="/<%= filename %>/edit">Edit</a>
+      <form class='inline' action="/<%= filename %>/delete" method='post'>
+        <button type='submit'>Delete</button>
+      </form>
     </li>
   <% end %>
 </ul>
 <p>
   <a href="/new_document">New Document</a>
 </p>
+<% if session[:signed_in] %>
+  <p class='user-status'>Signed in as <%= session[:username] %></p>
+  <form class='inline' action="/user/sign_out" method="post">
+    <button type="submit">Sign Out</button>
+  </form>
+<% else %>
+  <p class="user-status">
+    <a href="/user/sign_in">Sign In</a>
+  </p>
+<% end %>
