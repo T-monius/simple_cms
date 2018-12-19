@@ -31,6 +31,10 @@ class SimpleCMSTest < Minitest::Test
     end
   end
 
+  def session
+    last_request.env["rack.session"]
+  end
+
   def test_index
     create_document "about.md"
     create_document "changes.txt"
@@ -93,10 +97,7 @@ class SimpleCMSTest < Minitest::Test
     post "/changes.txt", content: "new content"
 
     assert_equal 302, last_response.status
-
-    get last_response["Location"]
-
-    assert_includes last_response.body, "changes.txt has been updated"
+    assert_equal "changes.txt has been updated.", session[:message]
 
     get "/changes.txt"
     assert_equal 200, last_response.status
@@ -115,10 +116,7 @@ class SimpleCMSTest < Minitest::Test
     post '/create_document', doc_name: 'leisure.txt'
 
     assert_equal 302, last_response.status
-
-    get last_response["location"]
-
-    assert_includes last_response.body, 'leisure.txt was created.'
+    assert_equal 'leisure.txt was created.', session[:message]
     
     get '/'
     assert_includes last_response.body, "leisure.txt"
@@ -137,12 +135,12 @@ class SimpleCMSTest < Minitest::Test
     post '/history.txt/delete'
 
     assert_equal 302, last_response.status
-
-    get last_response["Location"]
-    assert_includes last_response.body, "history.txt was deleted"
+    assert_equal "history.txt was deleted.", session[:message]
 
     get "/"
-    refute_includes last_response.body, "history.txt"
+    assert_includes last_response.body, "history.txt was deleted"
+    refute_includes last_response.body, ">history.txt</a>"
+    refute_includes last_response.body, %q(href="/history.txt")
   end
 
   def test_sign_in_page
@@ -157,40 +155,36 @@ class SimpleCMSTest < Minitest::Test
     post '/user/sign_in', username: "admin", password: "secret"
 
     assert_equal 302, last_response.status
+    assert_equal 'Welcome!', session[:message]
+    assert_equal 'admin', session[:username]
 
     get last_response["Location"]
-    assert_includes last_response.body, 'Welcome!'
     assert_includes last_response.body, "Signed in as admin"
   end
 
   def test_signin_with_bad_credentials
     post "/user/sign_in", username: "guest", password: "shhhh"
     assert_equal 422, last_response.status
+    assert_nil session[:username]
     assert_includes last_response.body, "Invalid Credentials"
   end
 
   def test_signout
-    post "/user/sign_in", username: "admin", password: "secret"
-    get last_response["Location"]
-    assert_includes last_response.body, "Welcome"
+    get "/", {}, {"rack.session" => { username: "admin", signed_in: true } }
+    assert_includes last_response.body, "Signed in as admin"
 
     post "/user/sign_out"
-    get last_response["Location"]
+    assert_equal 'You have been signed out.', session[:message]
 
-    assert_includes last_response.body, "You have been signed out."
+    get last_response["Location"]
+    assert_nil session[:username]
     assert_includes last_response.body, "Sign In"
   end
 
   def test_not_found
     get '/notta_file.txt'
+
     assert_equal 302, last_response.status
-
-    get last_response['Location']
-
-    assert_equal 200, last_response.status
-    assert_includes last_response.body, 'notta_file.txt does not exist'
-
-    get '/'
-    refute_includes last_response.body, 'notta_file.txt does not exist'
+    assert_equal 'notta_file.txt does not exist.', session[:message]
   end
 end
