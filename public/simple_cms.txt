@@ -303,3 +303,64 @@ Signing In and Out
     + Modify the session 'signed_in' to reflect false
     + Set a message to the session for 'signing out'
     + redirect to the index
+
+Restricting Actions to Only Signed-in Users
+  - This will simply modify existing routes
+  - Can modify existing tests for testing purposes
+  1) The following actions redirect to index w/ message if
+    the user is not signed in:
+    + Visit the edit page for a document
+    + Submit the changes to a document
+    + Visit the new document page
+    + Submit the new document form
+    + Delete a document
+
+Implementation
+  - Some of these actions permit the user to visit pages
+    they would be restricted from visiting by the index
+    but nonetheless are there
+  - Visit the edit page
+    + From the edit get route, only redirect if signed in
+    + Provide a session message if not
+    + Send status and redirect back to index
+  - Submit changes to a document
+    + If on the edit page
+    + In post for edit, redirect back to the get for edit
+    + Provide a message and status
+  - Visit the new document page
+    + From the index route, provide authentication
+    + Redirect back to the index with message and status
+  - Submit the new document form
+    + From the new doc post route, verify sign in
+    + Redirect back with message and status if not
+  - Delete a Document
+    + From the post for deleting, redirect back
+    + Message and status
+
+Storing User Accpounts in an External File
+  - 1) An administrator should be able to modify the list of
+    users who may sign into the application by editing a configuration file using their text editor.
+
+Implementation
+  - 1)
+    + Signing in as the administrator renders an extra file
+      at index
+      > Config file
+      > Stored in data?
+      > Stored in config directory?
+        = Have to create a method to access that path
+        = All roots that render files need to check if
+          the file is in the data or config directory
+    + What should be the format of the config file?
+      > YAML?
+      > Create a file called users.yml and add a few users to
+        it. Use the format specified above in the hint.
+    + Is the administrator on the list?
+      > I'll have my program authenticate the administrator
+        from the list as well
+  - 2) 
+    + When a user is attempting to sign in, load the file
+      created in #1 and use it to validate the user's credentials.
+  - 3) 
+    + Modify the application to use test/users.yml to load
+      user credentials during testing.

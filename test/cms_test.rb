@@ -35,6 +35,10 @@ class SimpleCMSTest < Minitest::Test
     last_request.env["rack.session"]
   end
 
+  def admin_session
+    { "rack.session" => { username: "admin", signed_in: true } }
+  end
+
   def test_index
     create_document "about.md"
     create_document "changes.txt"
@@ -83,7 +87,8 @@ class SimpleCMSTest < Minitest::Test
     assert_includes(last_response.body, '2013 - Ruby 2.0 released.')
   end
 
-  def test_edit_get_route
+  def test_edit_form
+    get "/", {}, admin_session
     create_document 'changes.txt'
 
     get '/changes.txt/edit'
@@ -93,7 +98,17 @@ class SimpleCMSTest < Minitest::Test
     assert_includes last_response.body, %q(<button type="submit")
   end
 
+  def test_editing_document_signed_out
+    create_document "changes.txt"
+
+    get "/changes.txt/edit"
+
+    assert_equal 302, last_response.status
+    assert_equal "You must be signed in to do that.", session[:message]
+  end
+
   def test_updating_document
+    get "/", {}, admin_session
     post "/changes.txt", content: "new content"
 
     assert_equal 302, last_response.status
@@ -104,7 +119,15 @@ class SimpleCMSTest < Minitest::Test
     assert_includes last_response.body, "new content"
   end
 
-  def test_new_document_get_route
+  def test_updating_document_signed_out
+    post "/changes.txt", {content: "new content"}
+
+    assert_equal 302, last_response.status
+    assert_equal "You must be signed in to do that.", session[:message]
+  end
+
+  def test_view_new_document_form
+    get "/", {}, admin_session
     get '/new_document'
 
     assert_equal 200, last_response.status
@@ -112,7 +135,15 @@ class SimpleCMSTest < Minitest::Test
     assert_includes last_response.body, %q(<button type="submit")
   end
 
+  def test_view_new_document_form_signed_out
+    get "/new_document"
+
+    assert_equal 302, last_response.status
+    assert_equal "You must be signed in to do that.", session[:message]
+  end
+
   def test_creating_new_document
+    get "/", {}, admin_session
     post '/create_document', doc_name: 'leisure.txt'
 
     assert_equal 302, last_response.status
@@ -122,13 +153,22 @@ class SimpleCMSTest < Minitest::Test
     assert_includes last_response.body, "leisure.txt"
   end
 
+  def test_create_new_document_signed_out
+    post "/create_document", {filename: "test.txt"}
+
+    assert_equal 302, last_response.status
+    assert_equal "You must be signed in to do that.", session[:message]
+  end
+
   def test_create_new_document_without_filename
+    get "/", {}, admin_session
     post "/create_document", doc_name: ""
     assert_equal 422, last_response.status
     assert_includes last_response.body, "A name is required"
   end
 
   def test_deleting_a_document
+    get "/", {}, admin_session
     content = content_from_main_system_file('history.txt')
     create_document 'history.txt', content
 
@@ -141,6 +181,14 @@ class SimpleCMSTest < Minitest::Test
     assert_includes last_response.body, "history.txt was deleted"
     refute_includes last_response.body, ">history.txt</a>"
     refute_includes last_response.body, %q(href="/history.txt")
+  end
+
+  def test_deleting_document_signed_out
+    create_document("test.txt")
+
+    post "/test.txt/delete"
+    assert_equal 302, last_response.status
+    assert_equal "You must be signed in to do that.", session[:message]
   end
 
   def test_sign_in_page
@@ -170,7 +218,7 @@ class SimpleCMSTest < Minitest::Test
   end
 
   def test_signout
-    get "/", {}, {"rack.session" => { username: "admin", signed_in: true } }
+    get "/", {}, admin_session
     assert_includes last_response.body, "Signed in as admin"
 
     post "/user/sign_out"

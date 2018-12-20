@@ -8,6 +8,12 @@
       </form>
     </li>
   <% end %>
+  <% if signed_in? %>
+    <li>
+      <a href="/<%= @users_file %>"><%= @users_file %></a>
+      <a href="/<%= @users_file %>/edit">Edit</a>
+    </li>
+  <% end %>
 </ul>
 <p>
   <a href="/new_document">New Document</a>
