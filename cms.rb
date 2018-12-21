@@ -2,7 +2,7 @@ require 'sinatra'
 require 'sinatra/reloader'
 require 'tilt/erubis'
 require 'redcarpet'
-require 'pry'
+require 'yaml'
 
 configure do
   enable :sessions
@@ -13,8 +13,17 @@ def main_env_data_path
   File.expand_path("../data", __FILE__)
 end
 
-def content_from_main_system_file(filename)
+def content_from_main_program_file(filename)
   file = File.join(main_env_data_path, filename)
+  File.read(file)
+end
+
+def main_env_config_path
+  File.expand_path("../config", __FILE__)
+end
+
+def content_from_main_config_file(filename)
+  file = File.join(main_env_config_path, filename)
   File.read(file)
 end
 
@@ -54,11 +63,13 @@ end
 def load_file_content(file_path)
   content = File.read(file_path)
   case File.extname(file_path)
-  when ".txt", '.yml'
+  when ".txt"
     headers["Content-Type"] = "text/plain"
     content
   when ".md"
     render_markdown(content)
+  when '.yml'
+    content
   end
 end
 
@@ -68,6 +79,17 @@ end
 
 def signed_in?
   session[:signed_in] ? true : false
+end
+
+def administrator?
+  signed_in? && session[:username] == 'admin'
+end
+
+def authentic_user?(username, password)
+  user_filepath = File.join(config_path, 'users.yml')
+  user_file = load_file_content(user_filepath)
+  user_hash = YAML.load(user_file)
+  user_hash[username] == password
 end
 
 def redirect_to_index_unless_signed_in
@@ -123,7 +145,7 @@ post '/user/sign_in' do
   @username = params[:username]
   password = params[:password]
 
-  if @username == 'admin' && password == 'secret'
+  if authentic_user?(@username, password)
     session[:signed_in] = true
     session[:username] = @username
     session[:message] = 'Welcome!'

@@ -8,7 +8,7 @@ require 'rack/test'
 require_relative '../cms'
 require 'fileutils'
 
-# require 'pry'
+require 'pry'
 
 class SimpleCMSTest < Minitest::Test
   include Rack::Test::Methods
@@ -25,8 +25,8 @@ class SimpleCMSTest < Minitest::Test
     FileUtils.rm_rf(data_path)
   end
 
-  def create_document(name, content = "")
-    File.open(File.join(data_path, name), "w") do |file|
+  def create_document(filepath, name, content = "")
+    File.open(File.join(filepath, name), "w") do |file|
       file.write(content)
     end
   end
@@ -40,8 +40,8 @@ class SimpleCMSTest < Minitest::Test
   end
 
   def test_index
-    create_document "about.md"
-    create_document "changes.txt"
+    create_document data_path, "about.md"
+    create_document data_path, "changes.txt"
 
     get '/'
 
@@ -52,8 +52,8 @@ class SimpleCMSTest < Minitest::Test
   end
 
   def test_viewing_markdown_document
-    content = content_from_main_system_file('about.md')
-    create_document 'about.md', content
+    content = content_from_main_program_file('about.md')
+    create_document data_path, 'about.md', content
 
     get '/about.md'
 
@@ -64,8 +64,8 @@ class SimpleCMSTest < Minitest::Test
   end
 
   def test_history_page
-    content = content_from_main_system_file('history.txt')
-    create_document 'history.txt', content
+    content = content_from_main_program_file('history.txt')
+    create_document data_path, 'history.txt', content
 
     get '/history.txt'
 
@@ -76,8 +76,8 @@ class SimpleCMSTest < Minitest::Test
   end
 
   def test_changes_page
-    content = content_from_main_system_file('changes.txt')
-    create_document 'changes.txt', content
+    content = content_from_main_program_file('changes.txt')
+    create_document data_path, 'changes.txt', content
 
     get '/changes.txt'
 
@@ -89,7 +89,7 @@ class SimpleCMSTest < Minitest::Test
 
   def test_edit_form
     get "/", {}, admin_session
-    create_document 'changes.txt'
+    create_document data_path, 'changes.txt'
 
     get '/changes.txt/edit'
 
@@ -99,7 +99,7 @@ class SimpleCMSTest < Minitest::Test
   end
 
   def test_editing_document_signed_out
-    create_document "changes.txt"
+    create_document data_path, "changes.txt"
 
     get "/changes.txt/edit"
 
@@ -169,8 +169,8 @@ class SimpleCMSTest < Minitest::Test
 
   def test_deleting_a_document
     get "/", {}, admin_session
-    content = content_from_main_system_file('history.txt')
-    create_document 'history.txt', content
+    content = content_from_main_program_file('history.txt')
+    create_document data_path, 'history.txt', content
 
     post '/history.txt/delete'
 
@@ -184,7 +184,7 @@ class SimpleCMSTest < Minitest::Test
   end
 
   def test_deleting_document_signed_out
-    create_document("test.txt")
+    create_document data_path, "test.txt"
 
     post "/test.txt/delete"
     assert_equal 302, last_response.status
@@ -200,6 +200,8 @@ class SimpleCMSTest < Minitest::Test
   end
 
   def test_signing_in
+    create_document config_path, 'users.yml', content_from_main_config_file('users.yml')
+
     post '/user/sign_in', username: "admin", password: "secret"
 
     assert_equal 302, last_response.status
@@ -211,6 +213,8 @@ class SimpleCMSTest < Minitest::Test
   end
 
   def test_signin_with_bad_credentials
+    create_document config_path, 'users.yml', content_from_main_config_file('users.yml')
+
     post "/user/sign_in", username: "guest", password: "shhhh"
     assert_equal 422, last_response.status
     assert_nil session[:username]

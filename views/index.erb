@@ -8,7 +8,7 @@
       </form>
     </li>
   <% end %>
-  <% if signed_in? %>
+  <% if administrator? %>
     <li>
       <a href="/<%= @users_file %>"><%= @users_file %></a>
       <a href="/<%= @users_file %>/edit">Edit</a>
@@ -18,7 +18,7 @@
 <p>
   <a href="/new_document">New Document</a>
 </p>
-<% if session[:signed_in] %>
+<% if signed_in? %>
   <p class='user-status'>Signed in as <%= session[:username] %></p>
   <form class='inline' action="/user/sign_out" method="post">
     <button type="submit">Sign Out</button>

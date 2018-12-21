@@ -345,6 +345,7 @@ Implementation
   - 1)
     + Signing in as the administrator renders an extra file
       at index
+      > Helper method for `administrator?`
       > Config file
       > Stored in data?
       > Stored in config directory?
@@ -358,9 +359,16 @@ Implementation
     + Is the administrator on the list?
       > I'll have my program authenticate the administrator
         from the list as well
+
   - 2) 
     + When a user is attempting to sign in, load the file
       created in #1 and use it to validate the user's credentials.
+      > Modify the POST for the sign in
+      > Redirect if the username and password are not in the
+        yaml file
+      > Helper method for authenticating?
+        = If a query to the hash with the password matches the
+          password provided, then it's authentic
   - 3) 
     + Modify the application to use test/users.yml to load
       user credentials during testing.
