@@ -1,5 +1,5 @@
 {
-  billy: '14651',
-  ronny: '14652',
-  admin: secret
+  billy: "$2a$10$B7q0hOwU6pgATPl2AKqFK.GAzTuJETSnUqWDUsAG3yg3ZhV1qEpBK",
+  ronny: "$2a$10$AX97WoTvP9LT1akhgPV20.hvcVI7d2YDmS4spZ62vvXqdeUSQy05K",
+  admin: "$2a$10$87LvG6TZtnnmOzPoSyVqW.Ioldg65N8Q4WpqzQb.rHbLiUL1NoCaK"
 }

@@ -372,3 +372,16 @@ Implementation
   - 3) 
     + Modify the application to use test/users.yml to load
       user credentials during testing.
+
+Storing Hashed Passwords
+  - 1) User passwords must be hashed using bcrypt before
+    being stored so that raw passwords are not being stored anywhere.
+
+Implementation
+  - Either gem install the 'bcrypt' gem or simply add it to
+    the gemfile and bundle install it
+  - Require bcrypt into the program file
+  - Define the `PasswordDigester` class in the application
+  - Iterate the user config file and encrypt it.
+  - Use `PasswordDigester.check?` to check passwords in the
+    users file.

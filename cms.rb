@@ -3,6 +3,8 @@ require 'sinatra/reloader'
 require 'tilt/erubis'
 require 'redcarpet'
 require 'yaml'
+require 'bcrypt'
+require 'pry'
 
 configure do
   enable :sessions
@@ -85,11 +87,17 @@ def administrator?
   signed_in? && session[:username] == 'admin'
 end
 
+def valid?(password, encrypted_password)
+  BCrypt::Password.new(encrypted_password) == password
+end
+
 def authentic_user?(username, password)
   user_filepath = File.join(config_path, 'users.yml')
   user_file = load_file_content(user_filepath)
   user_hash = YAML.load(user_file)
-  user_hash[username] == password
+  return false unless user_hash.has_key?(username)
+  encrypted_password = user_hash[username]
+  valid?(password, encrypted_password)
 end
 
 def redirect_to_index_unless_signed_in
